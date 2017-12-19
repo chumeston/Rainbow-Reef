@@ -7,9 +7,10 @@ public class Block extends TickingObject {
     private int hp = 1;
     private int blockType = 0;
 
-    public Block(int x, int y, int tick, int speed, Image[] image, Events events, int blockType) {
+    public Block(int x, int y, int tick, int speed, Image[] image, Events events, int blockType, MapLevel mapLevel) {
         super(x, y, tick, speed, image, events, 0, 0);
         this.blockType = blockType;
+        this.mapLevel = mapLevel;
         if (blockType == 3) {
             hp = hp * 2;
         }

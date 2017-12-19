@@ -5,9 +5,11 @@ public class Enemy extends TickingObject {
 
     private int blockType = 0;
     private int destroy;
+    private MapLevel mapLevel;
 
-    public Enemy(int x, int y, int tick, int speed, Image[] image, Events events, int destroy, int collide) {
+    public Enemy(int x, int y, int tick, int speed, Image[] image, Events events, int destroy, int collide, MapLevel mapLevel) {
         super(x, y, tick, speed, image, events, destroy, collide);
+        this.mapLevel = mapLevel;
     }
 
     @Override

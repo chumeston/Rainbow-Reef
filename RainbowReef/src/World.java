@@ -9,6 +9,7 @@ public class World extends JPanel {
     private int width = 640;
     private int height = 480;
     private Events events;
+    private Entity entity;
     private Image playerHealthBar;
     private MapLevel mapLevel;
     private BufferedImage[] entireScreen;
@@ -17,18 +18,19 @@ public class World extends JPanel {
     private ArrayList<ArrayList<GameObject>> blockList = new ArrayList<>();
 
 
-    public World(Image[] entireScreenImage, Image[] image, Events events, MapLevel mapLevel, Image playerHealthBar) {
+    public World(Image[] entireScreenImage, Entity entity, Image[] image, Events events, MapLevel mapLevel, Image playerHealthBar) {
         this.image = new Image[11][1];
-        for (int i = 0; i <= 10; i++) {
+        for (int i = 0; i < 11; i++) {
             this.image[i][0] = image[i];
         }
         this.entireScreenImage = new Image[4];
         this.entireScreen = new BufferedImage[4];
         this.events = events;
+        this.entity = entity;
         this.mapLevel = mapLevel;
         this.playerHealthBar = playerHealthBar;
         this.drawBlocks();
-        for (int i = 0; i <= 3; i++) {
+        for (int i = 0; i < 4; i++) {
             this.entireScreenImage[i] = entireScreenImage[i];
             this.entireScreen[i] = bufferedImage(entireScreenImage[i]);
         }
@@ -138,32 +140,32 @@ public class World extends JPanel {
                 if (list.length == 5) {
                     if (list[4].equals("1")) {
                         for (int i = Integer.valueOf(list[0]); i < this.width; i += image[Integer.valueOf(list[2])][0].getWidth(null)) {
-                            blockList.get(0).add(new Block(i, Integer.valueOf(list[1]), 0, 0, image[Integer.valueOf(list[2])], this.events, 1));
-                            blockList.get(1).add(new Block(i, Integer.valueOf(list[1]), 0, 0, image[Integer.valueOf(list[2])], this.events, 1));
+                            blockList.get(0).add(new Block(i, Integer.valueOf(list[1]), 0, 0, image[Integer.valueOf(list[2])], this.events, 1, mapLevel));
+                            blockList.get(1).add(new Block(i, Integer.valueOf(list[1]), 0, 0, image[Integer.valueOf(list[2])], this.events, 1, mapLevel));
                         }
                     } else {
                         for (int i = Integer.valueOf(list[1]); i < this.height; i += image[Integer.valueOf(list[2])][0].getHeight(null)) {
-                            blockList.get(0).add(new Block(Integer.valueOf(list[0]), i, 0, 0, image[Integer.valueOf(list[2])], this.events, 1));
-                            blockList.get(1).add(new Block(Integer.valueOf(list[0]), i, 0, 0, image[Integer.valueOf(list[2])], this.events, 1));
+                            blockList.get(0).add(new Block(Integer.valueOf(list[0]), i, 0, 0, image[Integer.valueOf(list[2])], this.events, 1, mapLevel));
+                            blockList.get(1).add(new Block(Integer.valueOf(list[0]), i, 0, 0, image[Integer.valueOf(list[2])], this.events, 1, mapLevel));
                         }
                     }
                 } else if (list.length == 6) {
                     int[] newInput = new int[6];
-                    for (int i = 0; i <= 5; i++) {
+                    for (int i = 0; i < 6; i++) {
                         newInput[i] = Integer.valueOf(list[i]);
                     }
                     for (int i = 0; i < newInput[5]; i++) {
                         blockList.get(newInput[4] - 1).add(new Block(newInput[0] + i * image[newInput[2]][0].getWidth(null),
-                                newInput[1], 0, 0, image[newInput[2]], this.events, newInput[3]));
+                                newInput[1], 0, 0, image[newInput[2]], this.events, newInput[3], mapLevel));
                     }
                 } else {
                     int[] input = new int[6];
-                    for (int i = 0; i <= 5; i++) {
+                    for (int i = 0; i < 6; i++) {
                         input[i] = Integer.valueOf(list[i]);
                     }
                     for (int i = 0; i < input[5]; i++) {
                         blockList.get(input[4] - 1).add(new Block(input[0] + (int) (1.5 * i * image[input[2]][0].getWidth(null)),
-                                input[1], 0, 0, image[input[2]], this.events, input[3]));
+                                input[1], 0, 0, image[input[2]], this.events, input[3], mapLevel));
                     }
                 }
             }

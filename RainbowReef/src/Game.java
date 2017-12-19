@@ -42,8 +42,8 @@ abstract public class Game extends JApplet implements Runnable {
         Graphics2D graphics2D = paint2D(dimension.width, dimension.height);
         draw(dimension.width, dimension.height, graphics2D);
         //Draws screen
-        graphics.drawImage(bufferedImage, 0, 0, this);
         graphics2D.dispose();
+        graphics.drawImage(bufferedImage, 0, 0, this);
     }
 
     public Graphics2D paint2D(int width, int height) {

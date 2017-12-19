@@ -6,16 +6,16 @@ import javax.swing.*;
 
 public class MainGame extends Game {
 
-    public static NewEvents events;
-    public static ArrayList<ArrayList> arrayList;
-    public static ArrayList<GameObject> objects;
-    public static ArrayList<Player> player;
-    public static Image playerLives;
-    public static Image[] playerBlock;
-    public static Image[] star;
-    public static Image[] bigEnemy;
-    public static Image[] smallEnemy;
-    public static GameController gameController;
+    private NewEvents events;
+    private ArrayList<ArrayList> arrayList;
+    private ArrayList<GameObject> objects;
+    static public ArrayList<Player> player;
+    private Image playerLives;
+    private Image[] playerBlock;
+    private Image[] star;
+    private Image[] bigEnemy;
+    private Image[] smallEnemy;
+    public static TimeSet timeSet;
     public static World world;
     public static int score = 0;
     public static MapLevel mapLevel;
@@ -65,7 +65,6 @@ public class MainGame extends Game {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         checkNewMap();
         world.updateEntireScreen();
@@ -80,13 +79,13 @@ public class MainGame extends Game {
                     iterator2.remove();
                 }
             }
-            gameController = new GameController();
+            timeSet = new TimeSet();
             destroy = false;
             fin = false;
             events.deleteObservers();
             this.requestFocus();
         }
-        gameController.timer();
+        timeSet.timer();
     }
 
     @Override
@@ -97,22 +96,22 @@ public class MainGame extends Game {
         Image[] image = new Image[11];
         image[0] = drawSprite("res/Block_double.png");
         //Draws blocks 1 through 7 in res folder
-        for (int i = 1; i < 8; i++ ) {
+        for (int i = 1; i < 8; i++) {
             image[i] = drawSprite("res/Block" + i + ".png");
         }
         image[8] = drawSprite("res/Block_life.png");
         image[9] = drawSprite("res/Block_solid.png");
-        image[10]= drawSprite("res/Wall.png");
+        image[10] = drawSprite("res/Wall.png");
         //Player lives in top right corner (subject to change)
         playerLives = drawSprite("res/Katch_small.png");
         Image[] backgroundImage = new Image[4];
         //Draws background for levels
-        for (int i = 1; i < 3; i++ ) {
-            backgroundImage [i - 1] = drawSprite("res/background" + i + ".png");
+        for (int i = 1; i < 3; i++) {
+            backgroundImage[i - 1] = drawSprite("res/background" + i + ".png");
         }
         backgroundImage[2] = drawSprite("res/Congratulation.png");
         backgroundImage[3] = drawSprite("res/Title.png");
-        world = new World(backgroundImage, image, events, mapLevel, playerLives);
+        world = new World(backgroundImage, new Update(), image, events, mapLevel, playerLives);
         add(world, BorderLayout.CENTER);
         arrayList = new ArrayList<>();
         objects = new ArrayList<>();
@@ -123,7 +122,7 @@ public class MainGame extends Game {
         arrayList.add(blocks);
         Controller controller = new Controller(events);
         addKeyListener(controller);
-        gameController = new GameController();
+        timeSet = new TimeSet();
         score = 0;
         fin = false;
     }
@@ -179,11 +178,11 @@ public class MainGame extends Game {
             if (mapLevel.getBlockType() == 1) {
                 mapLevel.setBlockType(2);
                 objects.clear();
-                objects.add(new Enemy(320, 70, 1, 0, bigEnemy, events, 1, 0));
-                objects.add(new Enemy(320, 200, 1, 5, smallEnemy, events, 1, 0));
+                objects.add(new Enemy(320, 70, 1, 0, bigEnemy, events, 1, 0, mapLevel));
+                objects.add(new Enemy(320, 200, 1, 5, smallEnemy, events, 1, 0, mapLevel));
                 player.get(0).setX(320);
                 player.get(0).setY(440);
-                objects.add(new Star(320,340, 1, 5, star, events, 1, 1, arrayList));
+                objects.add(new Star(320, 340, 1, 5, star, events, 1, 1, arrayList));
                 arrayList.remove(2);
                 arrayList.add(world.showBlocks());
             } else if (mapLevel.getBlockType() == 2) {
@@ -193,6 +192,32 @@ public class MainGame extends Game {
             } else if (mapLevel.getBlockType() == 4) {
                 objects.clear();
                 arrayList.remove(2);
+            }
+        }
+    }
+
+    public class TimeSet {
+
+        private int timer;
+
+        public TimeSet() {
+            timer = 0;
+        }
+
+        public void timer() {
+            switch (timer) {
+                case 0:
+                    player.add(new PlayerBlock(320, 440, 1, 15, playerBlock,
+                            events, 3, 0, KeyEvent.VK_A, KeyEvent.VK_D, world, 0));
+                    objects.add(new Enemy(320, 80, 1, 0, bigEnemy, events, 1, 0, mapLevel));
+                    objects.add(new Star(320, 350, 1, 5, star, events, 1, 1, arrayList));
+                    temp = true;
+                    break;
+            }
+            if (timer == Integer.MAX_VALUE) {
+                timer = 1;
+            } else {
+                timer++;
             }
         }
     }
@@ -215,11 +240,51 @@ public class MainGame extends Game {
         }
 
         @Override
+        public void canMove() {
+            if (isMovingLeft()) {
+                int x = getSpeed();
+                int newX = this.getX() - x;
+                int newY = this.getY();
+                if (!this.getWorld().valid(this, newX, newY) || (this.getPlayer() != null
+                        && this.getPlayer().touchBlock(newX, newY, this))) {
+                    return;
+                }
+                keyListener(-x);
+            } else if (isMovingRight()) {
+                int x = getSpeed();
+                int newX = this.getX() + x;
+                int newY = this.getY();
+                if (!this.getWorld().valid(this, newX, newY) || (this.getPlayer() != null
+                        && this.getPlayer().touchBlock(newX, newY, this))) {
+                    return;
+                }
+                keyListener(x);
+            }
+        }
+
+        public void gameLoop() {
+            boolean newFlag = false;
+            for (int i = 0; i < objects.size(); i++) {
+                if (objects.get(i) instanceof Star) {
+                    newFlag = true;
+                    break;
+                }
+            }
+            if (!newFlag) {
+                this.setDamage(getDamage() + 1);
+                if (getDamage() >= getDestroy()) {
+                    setFinished(true);
+                } else {
+                    reset();
+                }
+            }
+        }
+
+        @Override
         public void isDead() {
             setFinished(true);
             mapLevel.setBlockType(4);
         }
-
 
         @Override
         public void NewCollision(GameObject gameObject) {
@@ -227,9 +292,6 @@ public class MainGame extends Game {
                 gameObject.collide(this);
             }
         }
-
-        @Override
-        public void collide(TickingObject tickingObject) {}
 
         @Override
         public int getWidth() {
@@ -241,83 +303,37 @@ public class MainGame extends Game {
             return super.getHeight() - 20;
         }
 
-        @Override
-        public void canMove() {
-            if (isMovingLeft()) {
-                int x = getSpeed();
-                int newX = this.getX() - x;
-                //Y stays the same entire game
-                int newY = this.getY();
-                if (!this.getWorld().valid(this, newX, newY) || (this.getPlayer() != null &&
-                        this.getPlayer().touchBlock(newX, newY, this))) {
-                    return;
-                }
-                //Negative towards left
-                keyListener(-x);
-            }
-            if (isMovingRight()) {
-                int x = getSpeed();
-                int newX = this.getX() + x;
-                //Y stays the same entire game
-                int newY = this.getY();
-                if (!this.getWorld().valid(this, newX, newY) || (this.getPlayer() != null &&
-                        this.getPlayer().touchBlock( newX, newY, this))) {
-                    return;
-                }
-                //Positive towards right
-                keyListener(x);
-            }
-        }
-
-        public void gameLoop() {
-            boolean flag = false;
-            for (int i = 0; i < objects.size(); i++) {
-                if (objects.get(i) instanceof Star) {
-                    flag = true;
-                    break;
-                }
-            }
-            if (!flag) {
-                this.setDamage(getDamage() + 1);
-                if (getDamage() >= getDestroy()) {
-                    setReset(true);
-                } else {
-                    reset();
-                }
-            }
-        }
-
         public void reset() {
             //Doesn't work if setReset is true
             this.setReset(false);
             this.setX(x);
             this.setY(y);
-            objects.add(new Star(320,350, 1, 5, star, events, 1, 1, arrayList));
+            objects.add(new Star(320, 350, 1, 5, star, events, 1, 1, arrayList));
         }
     }
 
-    public static NewEvents getEvents() {
+    public NewEvents getEvents() {
         return events;
     }
 
-    public static void setEvents(NewEvents events) {
-        MainGame.events = events;
+    public void setEvents(NewEvents events) {
+        this.events = events;
     }
 
-    public static ArrayList<ArrayList> getArrayList() {
+    public ArrayList<ArrayList> getArrayList() {
         return arrayList;
     }
 
-    public static void setArrayList(ArrayList<ArrayList> arrayList) {
-        MainGame.arrayList = arrayList;
+    public void setArrayList(ArrayList<ArrayList> arrayList) {
+        this.arrayList = arrayList;
     }
 
-    public static ArrayList<GameObject> getObjects() {
+    public ArrayList<GameObject> getObjects() {
         return objects;
     }
 
-    public static void setObjects(ArrayList<GameObject> objects) {
-        MainGame.objects = objects;
+    public void setObjects(ArrayList<GameObject> objects) {
+        this.objects = objects;
     }
 
     public static ArrayList<Player> getPlayer() {
@@ -328,52 +344,52 @@ public class MainGame extends Game {
         MainGame.player = player;
     }
 
-    public static Image getPlayerLives() {
+    public Image getPlayerLives() {
         return playerLives;
     }
 
-    public static void setPlayerLives(Image playerLives) {
-        MainGame.playerLives = playerLives;
+    public void setPlayerLives(Image playerLives) {
+        this.playerLives = playerLives;
     }
 
-    public static Image[] getPlayerBlock() {
+    public Image[] getPlayerBlock() {
         return playerBlock;
     }
 
-    public static void setPlayerBlock(Image[] playerBlock) {
-        MainGame.playerBlock = playerBlock;
+    public void setPlayerBlock(Image[] playerBlock) {
+        this.playerBlock = playerBlock;
     }
 
-    public static Image[] getStar() {
+    public Image[] getStar() {
         return star;
     }
 
-    public static void setStar(Image[] star) {
-        MainGame.star = star;
+    public void setStar(Image[] star) {
+        this.star = star;
     }
 
-    public static Image[] getBigEnemy() {
+    public Image[] getBigEnemy() {
         return bigEnemy;
     }
 
-    public static void setBigEnemy(Image[] bigEnemy) {
-        MainGame.bigEnemy = bigEnemy;
+    public void setBigEnemy(Image[] bigEnemy) {
+        this.bigEnemy = bigEnemy;
     }
 
-    public static Image[] getSmallEnemy() {
+    public Image[] getSmallEnemy() {
         return smallEnemy;
     }
 
-    public static void setSmallEnemy(Image[] smallEnemy) {
-        MainGame.smallEnemy = smallEnemy;
+    public void setSmallEnemy(Image[] smallEnemy) {
+        this.smallEnemy = smallEnemy;
     }
 
-    public static GameController getGameController() {
-        return gameController;
+    public static TimeSet getTimeSet() {
+        return timeSet;
     }
 
-    public static void setGameController(GameController gameController) {
-        MainGame.gameController = gameController;
+    public static void setTimeSet(TimeSet timeSet) {
+        MainGame.timeSet = timeSet;
     }
 
     public static World getWorld() {
