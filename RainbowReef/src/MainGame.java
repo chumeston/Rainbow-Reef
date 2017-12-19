@@ -1,7 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+import java.net.*;
 import java.util.*;
+import javax.sound.midi.*;
 import javax.swing.*;
 
 public class MainGame extends Game {
@@ -15,6 +17,7 @@ public class MainGame extends Game {
     private Image[] star;
     private Image[] bigEnemy;
     private Image[] smallEnemy;
+    private URL[] soundUrl;
     public static TimeSet timeSet;
     public static World world;
     public static int score = 0;
@@ -127,6 +130,29 @@ public class MainGame extends Game {
     }
 
     @Override
+    public void sounds() {
+        try {
+            Sequence sequence;
+            Sequencer sequencer;
+            URL url = MainGame.class.getResource("res/Music.mid");
+            soundUrl = new URL[5];
+            soundUrl[0] = MainGame.class.getResource("res/Sound_block.wav");
+            soundUrl[1] = MainGame.class.getResource("res/Sound_bigleg.wav");
+            soundUrl[2] = MainGame.class.getResource("res/Sound_wall.wav");
+            soundUrl[3] = MainGame.class.getResource("res/Sound_katch.wav");
+            soundUrl[4] = MainGame.class.getResource("res/Sound_lost.wav");
+            sequence =  MidiSystem.getSequence(url);
+            sequencer = MidiSystem.getSequencer();
+            sequencer.open();
+            sequencer.setSequence(sequence);
+            sequencer.start();
+            sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+        } catch(Exception e) {
+            System.out.println("Error " + e.getMessage());
+        }
+    }
+
+    @Override
     public void imageLoop() {
         try {
             star = new Image[45];
@@ -183,7 +209,7 @@ public class MainGame extends Game {
                 objects.add(new Enemy(420, 200, 1, 5, smallEnemy, events, 1, 0, mapLevel));
                 player.get(0).setX(320);
                 player.get(0).setY(440);
-                objects.add(new Star(320, 340, 1, 5, star, events, 1, 1, arrayList));
+                objects.add(new Star(320, 340, 1, 5, star, events, 1, 1, arrayList, soundUrl));
                 arrayList.remove(2);
                 arrayList.add(world.showBlocks());
             } else if (mapLevel.getBlockType() == 2) {
@@ -211,7 +237,7 @@ public class MainGame extends Game {
                     player.add(new PlayerBlock(320, 440, 1, 15, playerBlock,
                             events, 3, 0, KeyEvent.VK_A, KeyEvent.VK_D, world, 0));
                     objects.add(new Enemy(320, 80, 1, 0, bigEnemy, events, 1, 0, mapLevel));
-                    objects.add(new Star(320, 350, 1, 5, star, events, 1, 1, arrayList));
+                    objects.add(new Star(320, 350, 1, 5, star, events, 1, 1, arrayList, soundUrl));
                     temp = true;
                     break;
             }
@@ -309,7 +335,7 @@ public class MainGame extends Game {
             this.setReset(false);
             this.setX(x);
             this.setY(y);
-            objects.add(new Star(320, 350, 1, 5, star, events, 1, 1, arrayList));
+            objects.add(new Star(320, 350, 1, 5, star, events, 1, 1, arrayList, soundUrl));
         }
     }
 

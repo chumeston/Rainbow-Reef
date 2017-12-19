@@ -9,6 +9,7 @@ abstract public class Game extends JApplet implements Runnable {
 
     abstract public void draw(int width, int height, Graphics2D graphics2D);
     abstract public void imageLoop();
+    abstract public void sounds();
 
     @Override
     public void start() {
@@ -33,6 +34,7 @@ abstract public class Game extends JApplet implements Runnable {
 
     @Override
     public void init() {
+        sounds();
         imageLoop();
     }
 
