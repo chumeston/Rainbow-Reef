@@ -76,8 +76,8 @@ abstract public class Game extends JApplet implements Runnable {
             return (BufferedImage) image;
         } else {
             BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null),
-                    //Shows area around sprites to help collision (change to TYPE_INT_RGB for regular)
-                    BufferedImage.TYPE_BYTE_GRAY);
+                    //Shows area around sprites to help collision (change to TYPE_INT_ARGB for regular)
+                    BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics2D = bufferedImage.createGraphics();
             graphics2D.drawImage(image, 0, 0, image.getWidth(null), image.getHeight(null), null);
             graphics2D.dispose();

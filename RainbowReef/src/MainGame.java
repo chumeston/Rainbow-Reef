@@ -64,8 +64,7 @@ public class MainGame extends Game {
                     break;
                 }
             }
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
         checkNewMap();
         world.updateEntireScreen();
         world.draw(arrayList, graphics2D);
@@ -180,6 +179,8 @@ public class MainGame extends Game {
                 objects.clear();
                 objects.add(new Enemy(320, 70, 1, 0, bigEnemy, events, 1, 0, mapLevel));
                 objects.add(new Enemy(320, 200, 1, 5, smallEnemy, events, 1, 0, mapLevel));
+                objects.add(new Enemy(220, 200, 1, 5, smallEnemy, events, 1, 0, mapLevel));
+                objects.add(new Enemy(420, 200, 1, 5, smallEnemy, events, 1, 0, mapLevel));
                 player.get(0).setX(320);
                 player.get(0).setY(440);
                 objects.add(new Star(320, 340, 1, 5, star, events, 1, 1, arrayList));
