@@ -1,6 +1,5 @@
-# csc413-secondgame
+# RainbowReef
 
-#### Second Game Choice : Rainbow Reef
 #### Corey Humeston, humeston@mail.sfsu.edu
 #### Mark Soriano, msorian2@mail.sfsu.edu
 
